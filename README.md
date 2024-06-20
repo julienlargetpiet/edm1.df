@@ -2,7 +2,7 @@
 
 # Install
 
--> git clone https://github.com/julienlargetpiet/edm1.geo
+-> git clone https://github.com/julienlargetpiet/edm1.df
 
 -> cd edm1
 
