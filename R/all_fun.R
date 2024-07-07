@@ -1833,7 +1833,15 @@ id_keepr <- function(inpt_datf, col_v=c(), el_v=c(), rstr_l=NA){
 #' @examples
 #'
 #' datf1 <- data.frame(c(1, 2, 1, 3), c("a", "z", "a", "p"))
+#'
+#' print(datf1)
 #' 
+#'   c.1..2..1..3. c..a....z....a....p.. c.1..2..1..3..1
+#' 1             1                     a               1
+#' 2             2                     z               2
+#' 3             1                     a               1
+#' 4             3                     p               3
+#'
 #' print(unique_datf(inpt_datf=datf1))
 #' 
 #' #   c.1..2..1..3. c..a....z....a....p..
@@ -1843,6 +1851,14 @@ id_keepr <- function(inpt_datf, col_v=c(), el_v=c(), rstr_l=NA){
 #' 
 #' datf1 <- data.frame(c(1, 2, 1, 3), c("a", "z", "a", "p"), c(1, 2, 1, 3))
 #' 
+#' print(datf1)
+#' 
+#'   c.1..2..1..3. c..a....z....a....p..
+#' 1             1                     a
+#' 2             2                     z
+#' 3             1                     a
+#' 4             3                     p
+#'
 #' print(unique_datf(inpt_datf=datf1, col=TRUE))
 #' 
 #' #  cur_v cur_v
@@ -1853,451 +1869,25 @@ id_keepr <- function(inpt_datf, col_v=c(), el_v=c(), rstr_l=NA){
 #' 
 #' @export
 
-unique_datf <- function(inpt_datf, col=FALSE){
-
-        comp_l <- list()
-
+unique_datf <- function(inpt_datf, col = FALSE){
+        comp_l <- c()
         if (col){
-
                 rtn_datf <- data.frame(matrix(data=NA, nrow=nrow(inpt_datf), ncol=0))
-
                 for (col in 1:ncol(inpt_datf)){
-
                         cur_v <- inpt_datf[, col]
-
-                        if ((list(cur_v) %in% comp_l) == FALSE){ rtn_datf <- cbind(rtn_datf, cur_v) }
-
-                        comp_l <- append(x=comp_l, values=list(cur_v))
-
+                        if ((paste(cur_v, collapse = "") %in% comp_l) == FALSE){ rtn_datf <- cbind(rtn_datf, cur_v) }
+                        comp_l <- append(x=comp_l, values=paste(cur_v, collapse = ""))
                 }
-
         }else{
-
                 rtn_datf <- data.frame(matrix(data=NA, nrow=0, ncol=ncol(inpt_datf)))
-
                 for (row in 1:nrow(inpt_datf)){
-
                         cur_v <- inpt_datf[row, ]
-
-                        if ((list(cur_v) %in% comp_l) == FALSE){ rtn_datf <- rbind(rtn_datf, cur_v) }
-
-                        comp_l <- append(x=comp_l, values=list(cur_v))
-
+                        if ((paste(cur_v, collapse = "") %in% comp_l) == FALSE){ rtn_datf <- rbind(rtn_datf, cur_v) }
+                        comp_l <- append(x=comp_l, values=paste(cur_v, collapse = ""))
                 }
-
         }
-
     return(rtn_datf)
-
 }
 
-#' vec_in_datf
-#'
-#' Allow to get if a vector is in a dataframe. Returns the row and column of the vector in the dataframe if the vector is contained in the dataframe.
-#'
-#' @param inpt_datf is the input dataframe
-#' @param inpt_vec is the vector that may be in the input dataframe
-#' @param coeff is the "slope coefficient" of inpt_vec
-#' @param conventional is if a positive slope coefficient means that the vector goes upward or downward 
-#' @param stop_untl is the maximum number of the input vector the function returns, if in the dataframe 
-#' @examples
-#'
-#' datf1 <- data.frame(c(1:5), c(5:1), c("a", "z", "z", "z", "a"))
-#' 
-#' print(datf1)
-#' 
-#' #  c.1.5. c.5.1. c..a....z....z....z....a..
-#' #1      1      5                          a
-#' #2      2      4                          z
-#' #3      3      3                          z
-#' #4      4      2                          z
-#' #5      5      1                          a
-#'
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 4, "z"), coeff=1))
-#'
-#' #NULL
-#' 
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 2, "z"), coeff=1))
-#' 
-#' #[1] 5 1
-#'
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(3, "z"), coeff=1))
-#'
-#' #[1] 3 2
-#'
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(4, "z"), coeff=-1))
-#' 
-#' #[1] 2 2
-#'
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(2, 3, "z"), coeff=-1))
-#' 
-#' #[1] 2 1
-#' 
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 2, "z"), coeff=-1, conventional=TRUE))
-#'  
-#' #[1] 5 1
-#'
-#' datf1[4, 2] <- 1
-#' 
-#' print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(1, "z"), coeff=-1, conventional=TRUE, stop_untl=4))
-#' 
-#' #[1] 4 2 5 2
-#' 
-#' @export
 
-vec_in_datf <- function(inpt_datf, inpt_vec=c(), coeff=0, stop_untl=1, conventional=FALSE){
-
-    if (conventional){ coeff <- coeff * -1 }
-
-    rtn_v <- c()
-
-    encounter_cnt = 0
-
-    if (coeff > -1){
-
-            for (I in 1:(ncol(inpt_datf) - length(inpt_vec) + 1)){
-
-                    strt_id = 1 + (length(inpt_vec) * coeff)
-
-                    for (i in strt_id:nrow(inpt_datf)){
-
-                        if (inpt_datf[i, I] == inpt_vec[1]){
-
-                                cur_row = i
-
-                                cur_col = I 
-
-                                col_cnt = 1
-
-                                while (col_cnt < (length(inpt_vec) + 1) & inpt_datf[cur_row, cur_col] == inpt_vec[col_cnt]){
-
-                                    cur_row = cur_row - coeff
-
-                                    if (!(col_cnt) == length(inpt_vec)){
-
-                                        cur_col = cur_col + 1
-
-                                    }
-
-                                    col_cnt = col_cnt + 1
-
-                                }
-
-                                if (cur_col == ncol(inpt_datf)){
-
-                                        rtn_v <- c(rtn_v, i, I)
-
-                                        encounter_cnt = encounter_cnt + 1
-
-                                        if (encounter_cnt == stop_untl){
-
-                                                return(rtn_v)
-
-                                        }
-
-                                }
-
-                        }
-
-                    }
-
-            }
-
-    }else{
-
-            for (I in 1:(ncol(inpt_datf) - length(inpt_vec) + 1)){
-
-                    strt_id = nrow(inpt_datf) - (length(inpt_vec) * abs(coeff))
-
-                    for (i in 1:strt_id){
-
-                        if (inpt_datf[i, I] == inpt_vec[1]){
-
-                                cur_row = i 
-
-                                cur_col = I
-
-                                col_cnt = 1
-
-                                while (col_cnt < (length(inpt_vec) + 1) & inpt_datf[cur_row, cur_col] == inpt_vec[col_cnt]){
-
-                                    cur_row = cur_row + abs(coeff)
-
-                                    if (!(col_cnt) == length(inpt_vec)){
-
-                                        cur_col = cur_col + 1
-
-                                    }
-
-                                    col_cnt = col_cnt + 1
-
-
-                                }
-
-                                if (cur_col == ncol(inpt_datf)){
-
-                                        rtn_v <- c(rtn_v, i, I)
-
-                                        encounter_cnt = encounter_cnt + 1
-
-                                        if (encounter_cnt == stop_untl){
-
-                                                return(rtn_v)
-
-                                        }
-
-                                }
-
-                        }
-
-                    }
-
-            }
-
-    }
-
-    return(rtn_v)
-
-}
-
-#' diff_datf
-#'
-#' Returns a vector with the coordinates of the cell that are not equal between 2 dataframes (row, column).
-#'
-#' @param datf1 is an an input dataframe
-#' @param datf2 is an an input dataframe
-#' @examples
-#'
-#' datf1 <- data.frame(c(1:6), c("oui", "oui", "oui", "oui", "oui", "oui"), c(6:1))
-#' 
-#' datf2 <- data.frame(c(1:7), c("oui", "oui", "oui", "oui", "non", "oui", "zz"))
-#' 
-#' print(diff_datf(datf1=datf1, datf2=datf2)) 
-#'
-#' #[1] 5 1 5 2
-#'
-#' @export
-
-diff_datf <- function(datf1, datf2){
-
-    rtn_v <- c()
-
-    min_r <- min(c(nrow(datf1), nrow(datf2)))
-
-    for (col_i in 1:min(c(ncol(datf1), ncol(datf2)))){
-
-            for (row_i in 1:min_r){
-
-                if (datf1[row_i, col_i] != datf2[row_i, col_i]){ rtn_v <- c(rtn_v, row_i, col_i) } 
-
-            }
-
-    }
-
-    return(rtn_v)
-
-}
-
-#' swipr
-#'
-#' Returns an ordered dataframes according to the elements order given. The input datafram has two columns, one with the ids which can be bonded to multiple elements in the other column.
-#'
-#' @param inpt_datf is the input dataframe
-#' @param how_to is a vector containing the elements in the order wanted
-#' @param id_w is the column number or the column name of the elements
-#' @param id_ids is the column number or the column name of the ids
-#' @examples
-#'
-#' datf <- data.frame("col1"=c("Af", "Al", "Al", "Al", "Arg", "Arg", "Arg", "Arm", "Arm", "Al"),
-#' 
-#'         "col2"=c("B", "B", "G", "S", "B", "S", "G", "B", "G", "B"))
-#' 
-#' print(swipr(inpt_datf=datf, how_to=c("G", "S", "B")))
-#' 
-#'    col1 col2
-#' 1    Af    B
-#' 2    Al    G
-#' 3    Al    S
-#' 4    Al    B
-#' 5   Arg    G
-#' 6   Arg    S
-#' 7   Arg    B
-#' 8   Arm    G
-#' 9   Arm    B
-#' 10   Al    B
-#'
-#' @export
-
-swipr <- function(inpt_datf, how_to=c(), id_w=2, id_ids=1){
-
-       if (typeof(id_w) == "character"){
-
-               id_w <- match(id_w, colnames(inpt_datf))
-
-       }
-
-       if (typeof(id_ids) == "character"){
-
-               id_ids <- match(id_ids, colnames(inpt_datf))
-
-       }
-
-       for (el in unique(inpt_datf[, id_ids])){
-
-            cur_rows <- inpt_datf[, id_ids] == el
-
-            cur_v <- inpt_datf[cur_rows, id_w]
-
-            inpt_datf[cur_rows, id_w] <- how_to[sort(match(x=cur_v, table=how_to), 
-                                                     decreasing=FALSE)]
-
-       }
-
-  return(inpt_datf)
-
-}
-
-#' intersect_mod
-#'
-#' Returns the mods that have elements in common
-#'
-#' @param datf is the input dataframe
-#' @param inter_col is the column name or the column number of the values that may be commun betwee the different mods
-#' @param mod_col is the column name or the column number of the mods in the dataframe
-#' @param ordered_descendly, in case that the elements in commun are numeric, this option can be enabled by giving a value of TRUE or FALSE see examples
-#' @param n_min is the minimum elements in common a mod should have to be taken in count
-#'
-#' @examples
-#'
-#' datf <- data.frame("col1"=c("oui", "oui", "oui", "oui", "oui", "oui", 
-#'                      "non", "non", "non", "non", "ee", "ee", "ee"), "col2"=c(1:6, 2:5, 1:3))
-#' 
-#' print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=2))
-#' 
-#'    col1 col2
-#' 2   oui    2
-#' 3   oui    3
-#' 7   non    2
-#' 8   non    3
-#' 12   ee    2
-#' 13   ee    3
-#'
-#' print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=3))
-#'
-#'    col1 col2
-#' 2   oui    2
-#' 3   oui    3
-#' 4   oui    4
-#' 5   oui    5
-#' 7   non    2
-#' 8   non    3
-#' 9   non    4
-#' 10  non    5
-#'
-#' print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=5))
-#' 
-#'   col1 col2
-#' 1  oui    1
-#' 2  oui    2
-#' 3  oui    3
-#' 4  oui    4
-#' 5  oui    5
-#' 6  oui    6
-#' 
-#' datf <- data.frame("col1"=c("non", "non", "oui", "oui", "oui", "oui", 
-#'                       "non", "non", "non", "non", "ee", "ee", "ee"), "col2"=c(1:6, 2:5, 1:3))
-#' 
-#' print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=3))
-#' 
-#'    col1 col2
-#' 8   non    3
-#' 9   non    4
-#' 10  non    5
-#' 3   oui    3
-#' 4   oui    4
-#' 5   oui    5
-#' 
-#' @export
-
-intersect_mod <- function(datf, inter_col, mod_col, n_min, descendly_ordered=NA){
-
-    if (typeof(inter_col) == "character"){
-
-            inter_col <- match(inter_col, colnames(datf))
-
-    }
-
-    if (typeof(mod_col) == "character"){
-
-            mod_col <- match(mod_col, colnames(datf))
-
-    }
-
-    mods <- unique(datf[, mod_col])  
-
-    final_intersect <- as.numeric(datf[datf[, mod_col] == mods[1], inter_col])
-
-    mods2 <- c(mods[1])
-
-    if (length(mods) > 1){
-
-            for (i in 2:length(mods)){
-
-                    cur_val <- as.numeric(datf[datf[, mod_col] == mods[i], inter_col])
-
-                    if (length(intersect(final_intersect, cur_val)) >= n_min){
-
-                            final_intersect <- intersect(final_intersect, cur_val)
-
-                            mods2 <- c(mods2, mods[i])
-
-                    }
-
-            }
-
-    }
-
-    cur_datf <- datf[datf[, mod_col] == mods2[1], ]
-
-    if (!is.na(descendly_ordered)){
-
-            final_intersect <- sort(x=final_intersect, decreasing=FALSE)
-
-            rtn_datf <- cur_datf[sort(match(final_intersect, cur_datf[, inter_col]), decreasing=descendly_ordered), ]
-
-            if (length(mods2) > 1){
-
-                    for (i in 2:length(mods2)){
-
-                        cur_datf <- datf[datf[, mod_col] == mods2[i], ]
-
-                        rtn_datf <- rbind(rtn_datf, cur_datf[sort(match(final_intersect, cur_datf[, inter_col]), decreasing=descendly_ordered), ])
-    
-
-                    }
-
-            }
-
-    }else{
-
-            rtn_datf <- cur_datf[match(final_intersect, cur_datf[, inter_col]), ]
-
-            if (length(mods2) > 1){
-
-                    for (i in 2:length(mods2)){
-
-                        cur_datf <- datf[datf[, mod_col] == mods2[i], ]
-
-                        rtn_datf <- rbind(rtn_datf, cur_datf[match(final_intersect, cur_datf[, inter_col]), ])
-    
-
-                    }
-
-            }
-
-    }
-
-    return(rtn_datf)
-
-}
 
