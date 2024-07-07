@@ -115,6 +115,44 @@ print(cut_v(inpt_v=c("ou-i", "n-on", "ou-i", "n-on"), sep_="-"))
 ```
 
 
+# `diff_datf`
+
+diff_datf
+
+
+## Description
+
+Returns a vector with the coordinates of the cell that are not equal between 2 dataframes (row, column).
+
+
+## Usage
+
+```r
+diff_datf(datf1, datf2)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`datf1`     |     is an an input dataframe
+`datf2`     |     is an an input dataframe
+
+
+## Examples
+
+```r
+datf1 <- data.frame(c(1:6), c("oui", "oui", "oui", "oui", "oui", "oui"), c(6:1))
+
+datf2 <- data.frame(c(1:7), c("oui", "oui", "oui", "oui", "non", "oui", "zz"))
+
+print(diff_datf(datf1=datf1, datf2=datf2))
+
+#[1] 5 1 5 2
+```
+
+
 # `groupr_datf`
 
 groupr_datf
@@ -284,6 +322,87 @@ print(insert_datf(datf_in=datf2, datf_ins=datf1, ins_loc=c(2, 2)))
 # 2             3      1                   5
 # 3             5      4                   3
 # 4             6      4               ereer
+```
+
+
+# `intersect_mod`
+
+intersect_mod
+
+
+## Description
+
+Returns the mods that have elements in common
+
+
+## Usage
+
+```r
+intersect_mod(datf, inter_col, mod_col, n_min, descendly_ordered = NA)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`datf`     |     is the input dataframe
+`inter_col`     |     is the column name or the column number of the values that may be commun betwee the different mods
+`mod_col`     |     is the column name or the column number of the mods in the dataframe
+`n_min`     |     is the minimum elements in common a mod should have to be taken in count
+`ordered_descendly, `     |     in case that the elements in commun are numeric, this option can be enabled by giving a value of TRUE or FALSE see examples
+
+
+## Examples
+
+```r
+datf <- data.frame("col1"=c("oui", "oui", "oui", "oui", "oui", "oui",
+"non", "non", "non", "non", "ee", "ee", "ee"), "col2"=c(1:6, 2:5, 1:3))
+
+print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=2))
+
+col1 col2
+2   oui    2
+3   oui    3
+7   non    2
+8   non    3
+12   ee    2
+13   ee    3
+
+print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=3))
+
+col1 col2
+2   oui    2
+3   oui    3
+4   oui    4
+5   oui    5
+7   non    2
+8   non    3
+9   non    4
+10  non    5
+
+print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=5))
+
+col1 col2
+1  oui    1
+2  oui    2
+3  oui    3
+4  oui    4
+5  oui    5
+6  oui    6
+
+datf <- data.frame("col1"=c("non", "non", "oui", "oui", "oui", "oui",
+"non", "non", "non", "non", "ee", "ee", "ee"), "col2"=c(1:6, 2:5, 1:3))
+
+print(intersect_mod(datf=datf, inter_col=2, mod_col=1, n_min=3))
+
+col1 col2
+8   non    3
+9   non    4
+10  non    5
+3   oui    3
+4   oui    4
+5   oui    5
 ```
 
 
@@ -498,6 +617,56 @@ print(see_datf(datf=datf1, condition_l=c("not_reg"), val_l=list("[a-z]")))
 ```
 
 
+# `swipr`
+
+swipr
+
+
+## Description
+
+Returns an ordered dataframes according to the elements order given. The input datafram has two columns, one with the ids which can be bonded to multiple elements in the other column.
+
+
+## Usage
+
+```r
+swipr(inpt_datf, how_to = c(), id_w = 2, id_ids = 1)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`inpt_datf`     |     is the input dataframe
+`how_to`     |     is a vector containing the elements in the order wanted
+`id_w`     |     is the column number or the column name of the elements
+`id_ids`     |     is the column number or the column name of the ids
+
+
+## Examples
+
+```r
+datf <- data.frame("col1"=c("Af", "Al", "Al", "Al", "Arg", "Arg", "Arg", "Arm", "Arm", "Al"),
+
+"col2"=c("B", "B", "G", "S", "B", "S", "G", "B", "G", "B"))
+
+print(swipr(inpt_datf=datf, how_to=c("G", "S", "B")))
+
+col1 col2
+1    Af    B
+2    Al    G
+3    Al    S
+4    Al    B
+5   Arg    G
+6   Arg    S
+7   Arg    B
+8   Arm    G
+9   Arm    B
+10   Al    B
+```
+
+
 # `unique_datf`
 
 unique_datf
@@ -600,6 +769,86 @@ val_replaced=c(TRUE), val_replacor="NA"))
 #2               oo4         FALSE
 #3                NA            NA
 #4             FALSE            NA
+```
+
+
+# `vec_in_datf`
+
+vec_in_datf
+
+
+## Description
+
+Allow to get if a vector is in a dataframe. Returns the row and column of the vector in the dataframe if the vector is contained in the dataframe.
+
+
+## Usage
+
+```r
+vec_in_datf(
+  inpt_datf,
+  inpt_vec = c(),
+  coeff = 0,
+  stop_untl = 1,
+  conventional = FALSE
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`inpt_datf`     |     is the input dataframe
+`inpt_vec`     |     is the vector that may be in the input dataframe
+`coeff`     |     is the "slope coefficient" of inpt_vec
+`stop_untl`     |     is the maximum number of the input vector the function returns, if in the dataframe
+`conventional`     |     is if a positive slope coefficient means that the vector goes upward or downward
+
+
+## Examples
+
+```r
+datf1 <- data.frame(c(1:5), c(5:1), c("a", "z", "z", "z", "a"))
+
+print(datf1)
+
+#  c.1.5. c.5.1. c..a....z....z....z....a..
+#1      1      5                          a
+#2      2      4                          z
+#3      3      3                          z
+#4      4      2                          z
+#5      5      1                          a
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 4, "z"), coeff=1))
+
+#NULL
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 2, "z"), coeff=1))
+
+#[1] 5 1
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(3, "z"), coeff=1))
+
+#[1] 3 2
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(4, "z"), coeff=-1))
+
+#[1] 2 2
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(2, 3, "z"), coeff=-1))
+
+#[1] 2 1
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(5, 2, "z"), coeff=-1, conventional=TRUE))
+
+#[1] 5 1
+
+datf1[4, 2] <- 1
+
+print(vec_in_datf(inpt_datf=datf1, inpt_vec=c(1, "z"), coeff=-1, conventional=TRUE, stop_untl=4))
+
+#[1] 4 2 5 2
 ```
 
 
